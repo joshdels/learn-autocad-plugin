@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="01-hellocad/01-hellocad.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>
