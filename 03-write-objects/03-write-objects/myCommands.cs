@@ -1,8 +1,7 @@
-﻿
-
-using Autodesk.AutoCAD.ApplicationServices;
+﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -13,65 +12,235 @@ namespace _03_write_objects
 {
     public class MyCommands
     {
-        // The CommandMethod attribute can be applied to any public  member 
-        // function of any public class.
-        // The function should take no arguments and return nothing.
-        // If the method is an intance member then the enclosing class is 
-        // intantiated for each document. If the member is a static member then
-        // the enclosing class is NOT intantiated.
-        //
-        // NOTE: CommandMethod has overloads where you can provide helpid and
-        // context menu.
 
-        // Modal Command with localized name
-        [CommandMethod("MyGroup", "MyCommand", "MyCommandLocal", CommandFlags.Modal)]
-        public void MyCommand() // This method can have any name
+        [CommandMethod("LineAdd")]
+        public void LineAddCommand()
         {
-            // Put your command code here
-            Document doc = AcadApp.DocumentManager.MdiActiveDocument;
-            Autodesk.AutoCAD.EditorInput.Editor ed;
-            if (doc != null)
-            {
-                ed = doc.Editor;
-                ed.WriteMessage("Hello, this is your first command.");
+            Database db = HostApplicationServices.WorkingDatabase;
 
+            using (Transaction tr =
+                db.TransactionManager.StartTransaction())
+            {
+                BlockTable bt =
+                    (BlockTable)tr.GetObject(
+                        db.BlockTableId,
+                        OpenMode.ForRead);
+
+                BlockTableRecord ms =
+                    (BlockTableRecord)tr.GetObject(
+                        bt[BlockTableRecord.ModelSpace],
+                        OpenMode.ForWrite);
+
+                Line line = new Line(
+                    new Point3d(-10, 0, 0),
+                    new Point3d(10, 0, 0));
+
+                ms.AppendEntity(line);
+                tr.AddNewlyCreatedDBObject(line, true);
+
+                tr.Commit();
             }
         }
 
-        // Modal Command with pickfirst selection
-        [CommandMethod("MyGroup", "MyPickFirst", "MyPickFirstLocal", CommandFlags.Modal | CommandFlags.UsePickSet)]
-        public void MyPickFirst() // This method can have any name
+
+        [CommandMethod("CircleAdd")]
+        public void CircleAddCommand()
         {
-            PromptSelectionResult result = AcadApp.DocumentManager.MdiActiveDocument.Editor.GetSelection();
-            if (result.Status == PromptStatus.OK)
+            Database db = HostApplicationServices.WorkingDatabase;
+
+            using (Transaction tr =
+                db.TransactionManager.StartTransaction())
             {
-                // There are selected entities
-                // Put your command using pickfirst set code here
+                BlockTable bt =
+                    (BlockTable)tr.GetObject(
+                        db.BlockTableId,
+                        OpenMode.ForRead);
+
+                BlockTableRecord ms =
+                    (BlockTableRecord)tr.GetObject(
+                        bt[BlockTableRecord.ModelSpace],
+                        OpenMode.ForWrite);
+
+                Circle circle = new Circle(
+                    new Point3d(50, 50, 0),
+                    Vector3d.ZAxis,
+                    5);
+
+                ms.AppendEntity(circle);
+
+                tr.AddNewlyCreatedDBObject(
+                    circle,
+                    true);
+
+                tr.Commit();
             }
-            else
+        }
+
+
+        [CommandMethod("DrawPolyline")]
+        public void DrawPolyline()
+        {
+            Document doc =
+                AcadApp.DocumentManager.MdiActiveDocument;
+
+            doc.SendStringToExecute(
+                "_.PLINE ",
+                true,
+                false,
+                false);
+        }
+
+        [CommandMethod("ClearAll")]
+        public void ClearAll()
+        {
+            Document? doc = AcadApp.DocumentManager.MdiActiveDocument;
+            Database db = doc.Database;
+            Editor ed = doc.Editor;
+
+            using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                // There are no selected entities
-                // Put your command code here
+                BlockTable bt = 
+                    (BlockTable)tr.GetObject(
+                        db.BlockTableId, 
+                        OpenMode.ForRead);
+
+                BlockTableRecord modelSpace =
+                (BlockTableRecord)tr.GetObject(
+                    bt[BlockTableRecord.ModelSpace],
+                    OpenMode.ForWrite);
+
+                foreach (ObjectId id in modelSpace)
+                {
+                    Entity entity =
+                        tr.GetObject(id, OpenMode.ForWrite) as Entity;
+
+                    if (entity != null)
+                    {
+                        entity.Erase();
+                    }
+                }
+
+                tr.Commit();
             }
+
+            ed.WriteMessage("\nAll modeel-space entities removed.");
         }
 
-        // Application Session Command with localized name
-        [CommandMethod("MyGroup", "MySessionCmd", "MySessionCmdLocal", CommandFlags.Modal | CommandFlags.Session)]
-        public void MySessionCmd() // This method can have any name
+        [CommandMethod("ColorLines")]
+        public void ColorLines()
         {
-            // Put your command code here
+            Document? doc = AcadApp.DocumentManager.MdiActiveDocument;
+
+            Editor ed = doc.Editor;
+            Database db = doc.Database;
+
+            if (doc == null)
+            {
+                return;
+            }
+
+            PromptSelectionOptions options =
+                new PromptSelectionOptions();
+
+            options.MessageForAdding =
+                "\nSelect lines to color red: ";
+
+            PromptSelectionResult result =
+                ed.GetSelection(options);
+
+            if (result.Status != PromptStatus.OK)
+            {
+                return;
+            }
+
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                foreach (SelectedObject selectedObject in result.Value)
+                {
+                    if (selectedObject == null )
+                    {
+                        continue; 
+                    }
+
+                    Entity entity =
+                        tr.GetObject(
+                            selectedObject.ObjectId, 
+                            OpenMode.ForWrite) as Entity;
+
+                    if (entity is Line line)
+                    {
+                        line.ColorIndex = 1;
+                    }
+                }
+
+                tr.Commit();
+            }
+
+            ed.WriteMessage(
+                "\nSelected liens have been colored red");
         }
 
-        // LispFunction is similar to CommandMethod but it creates a lisp 
-        // callable function. Many return types are supported not just string
-        // or integer.
-        [LispFunction("MyLispFunction", "MyLispFunctionLocal")]
-        public int MyLispFunction(ResultBuffer args) // This method can have any name
+        [CommandMethod("ColorEntites")]
+        public void ColorEntities()
         {
-            // Put your command code here
+            Document? doc = AcadApp.DocumentManager.MdiActiveDocument;
 
-            // Return a value to the AutoCAD Lisp Interpreter
-            return 1;
+            Editor ed = doc.Editor;
+            Database db = doc.Database;
+
+            if (doc == null)
+            {
+                return;
+            }
+
+            PromptSelectionOptions options =
+                new PromptSelectionOptions();
+
+            options.MessageForAdding =
+                "\nSelect entities to color red: ";
+
+            PromptSelectionResult result =
+                ed.GetSelection(options);
+
+            if (result.Status != PromptStatus.OK)
+            {
+                return;
+            }
+
+            int count = 0;
+
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                foreach (SelectedObject selectedObject in result.Value)
+                {
+                    if (selectedObject == null)
+                    {
+                        continue;
+                    }
+
+                    Entity? entity =
+                        tr.GetObject(
+                            selectedObject.ObjectId,
+                            OpenMode.ForWrite) as Entity;
+
+
+
+                    if (entity == null)
+                    {
+                        continue;
+                    }
+
+                    entity.ColorIndex = 1;
+
+                    count++;
+                }
+
+                tr.Commit();
+            }
+
+            ed.WriteMessage(
+                 $"\nColored {count} entities red.");
         }
+    
     }
 }

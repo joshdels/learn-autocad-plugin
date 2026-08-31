@@ -1,0 +1,93 @@
+﻿<Window x:Class="_08_parcel_maneger.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Parcel Manager"
+        Height="600"
+        Width="700"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="20">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+
+        <!-- TITLE -->
+        <TextBlock
+            Grid.Row="0"
+            Text="Parcel Manager"
+            FontSize="26"
+            FontWeight="Bold"/>
+
+
+        <!-- MASTER ROOT FOLDER -->
+        <TextBlock
+            Grid.Row="1"
+            Text="Master Root Folder"
+            Margin="0,25,0,5"/>
+
+        <Grid Grid.Row="2">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox
+                Grid.Column="0"
+                x:Name="MasterFolderTextBox"
+                Height="30"
+                IsReadOnly="True"/>
+
+            <Button
+                Grid.Column="1"
+                Content="Browse"
+                Width="80"
+                Height="30"
+                Margin="8,0,0,0"
+                Click="BrowseFolder_Click"/>
+
+        </Grid>
+
+
+        <!-- MASTER FILE -->
+        <TextBlock
+            Grid.Row="4"
+            Text="Master Drawing"
+            FontWeight="Bold"/>
+
+        <Button
+            Grid.Row="5"
+            x:Name="MasterFileButton"
+            Content="MASTER.dwg"
+            Width="150"
+            Height="40"
+            HorizontalAlignment="Left"
+            Margin="0,10,0,0"
+            Click="OpenMasterFile_Click"/>
+
+
+        <!-- BARANGAYS -->
+        <TextBlock
+            Grid.Row="7"
+            Text="Barangays"
+            FontSize="18"
+            FontWeight="Bold"/>
+
+        <ListBox
+            Grid.Row="8"
+            x:Name="BarangayListBox"
+            Margin="0,10,0,0"/>
+
+    </Grid>
+
+</Window>

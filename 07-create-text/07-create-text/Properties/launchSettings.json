@@ -3,7 +3,7 @@
     "Acad": {
       "commandName": "Executable",
       "executablePath": "C:\\Program Files\\Autodesk\\AutoCAD 2027\\acad.exe",
-      "workingDirectory": "D:\\1. PROJECT\\learn-autocad-plugin\\03-write-objects\\03-write-objects\\bin\\x64\\Debug\\net10.0-windows"
+      "workingDirectory": "D:\\1. PROJECT\\learn-autocad-plugin\\07-create-text\\07-create-text\\bin\\x64\\Debug\\net10.0-windows"
     }
   }
 }
