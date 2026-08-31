@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="02-read-entities/02-read-entities.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>
